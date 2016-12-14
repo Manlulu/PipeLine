@@ -3,7 +3,7 @@ var context = canvas.getContext("2d");
 var gridSize = {cols: 15, rows: 15};
 
 var playerSize = {width: Math.ceil(canvas.width / gridSize.cols), height: Math.ceil(canvas.height / gridSize.rows)};
-var player = {};    // Player skal inneholde x og y coordinater
+var player = {};    // Player er x og y coordinater
 var playerDirection;
 
 var MovingDirection = {
@@ -36,7 +36,8 @@ function gameLoop() {
 }
 
 function update() {
-    movePlayer();
+    if (allowPlayerMovement())
+        movePlayer();
 }
 
 function draw() {
@@ -50,6 +51,18 @@ function draw() {
         canvas.width / gridSize.cols, canvas.height / gridSize.rows);
 }
 
+function allowPlayerMovement() {
+    return !movingPastTopOfMap() && !movingPastBottomOfMap();
+}
+
+function movingPastTopOfMap() {
+    return playerDirection == MovingDirection.UP && player.y == 0;
+}
+
+function movingPastBottomOfMap() {
+    return playerDirection == MovingDirection.DOWN && player.y == gridSize.rows - 1;
+}
+
 function movePlayer() { // Want movement and stopping in the same function
     var checkDirection = playerDirection;
     playerDirection = MovingDirection.STAND_STILL;
@@ -58,17 +71,13 @@ function movePlayer() { // Want movement and stopping in the same function
             player.x--;
             break;
         case MovingDirection.UP:
-            if (player.y > 0) {
-                player.y--;
-            }
+            player.y--;
             break;
         case MovingDirection.RIGHT:
             player.x++;
             break;
         case MovingDirection.DOWN:
-            if (player.y < gridSize.rows - 1) {
-                player.y++;
-            }
+            player.y++;
             break;
     }
 }
