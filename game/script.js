@@ -73,15 +73,23 @@ document.addEventListener('keydown', function(event){
     switch (event.keyCode){
         case 37:
             playerDirection = MovingDirection.LEFT;
+            update();
+            draw();
             break;
         case 38:
             playerDirection = MovingDirection.UP;
+            update();
+            draw();
             break;
         case 39:
             playerDirection = MovingDirection.RIGHT;
+            update();
+            draw();
             break;
         case 40:
             playerDirection = MovingDirection.DOWN;
+            update();
+            draw();
             break;
         default:
             playerDirection = MovingDirection.STAND_STILL;
