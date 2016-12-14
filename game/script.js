@@ -1,7 +1,7 @@
 var canvas = document.getElementById("game_board");
 var context = canvas.getContext("2d");
-
 var gridSize = {cols: 15, rows: 15};
+
 var playerSize = {width: Math.ceil(canvas.width / gridSize.cols), height: Math.ceil(canvas.height / gridSize.rows)};
 var player = {};    // Player skal inneholde x og y coordinater
 var playerDirection;
