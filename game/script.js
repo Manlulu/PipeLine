@@ -6,6 +6,8 @@ var playerSize = {width: Math.ceil(canvas.width / gridSize.cols), height: Math.c
 var player = {};    // Player er x og y coordinater
 var playerDirection;
 
+var pipes = []; // Pipes kan være et array
+
 var MovingDirection = {
     LEFT: 0,
     UP: 1,
@@ -38,7 +40,13 @@ function gameLoop() {
 function update() {
     if (allowPlayerMovement())
         movePlayer();
+
+
 }
+
+// Move to a more fitting location. Must refresh after each point.
+var hole1 = Math.floor(Math.random() * gridSize.rows - 2) + 1;
+var hole2 = hole1++;
 
 function draw() {
     // Reset canvas
@@ -49,6 +57,21 @@ function draw() {
     context.fillStyle = "#C3E172";
     context.fillRect(player.x * playerSize.width, player.y * playerSize.height,
         canvas.width / gridSize.cols, canvas.height / gridSize.rows);
+
+
+    for (var i = 0; i < gridSize.rows; i++) {
+        pipes.push({x: 11, y: i});
+    }
+
+
+
+    context.fillStyle = "#31EF24";
+    for (var i = 0; i < gridSize.rows; i++) {
+        if (i != hole1 && i != hole2) {
+            context.fillRect(pipes[i].x * playerSize.width, pipes[i].y * playerSize.height,
+                canvas.width / gridSize.cols, canvas.height / gridSize.rows);
+        }
+    }
 }
 
 function allowPlayerMovement() {
