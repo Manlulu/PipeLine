@@ -53,26 +53,30 @@ function draw() {
 function movePlayer() { // Want movement and stopping in the same function
     var checkDirection = playerDirection;
     playerDirection = MovingDirection.STAND_STILL;
-    switch (checkDirection){
+    switch (checkDirection) {
         case MovingDirection.LEFT:
             player.x--;
             break;
         case MovingDirection.UP:
-            player.y--;
+            if (player.y > 0) {
+                player.y--;
+            }
             break;
         case MovingDirection.RIGHT:
             player.x++;
             break;
         case MovingDirection.DOWN:
-            player.y++;
+            if (player.y < gridSize.rows - 1) {
+                player.y++;
+            }
             break;
     }
 }
 
-document.addEventListener('keydown', function(event){
-    switch (event.keyCode){
+document.addEventListener('keydown', function (event) {
+    switch (event.keyCode) {
         case 37:
-            playerDirection = MovingDirection.LEFT;
+            //       playerDirection = MovingDirection.LEFT;
             update();
             draw();
             break;
@@ -82,7 +86,7 @@ document.addEventListener('keydown', function(event){
             draw();
             break;
         case 39:
-            playerDirection = MovingDirection.RIGHT;
+            //       playerDirection = MovingDirection.RIGHT;
             update();
             draw();
             break;
