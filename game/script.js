@@ -7,6 +7,8 @@ var player = {};    // Player er x og y coordinater
 var playerDirection;
 
 var score = 0;
+var highScore = 0;
+var lastHighScore = 0;
 
 var pipes = [];
 var pipeHole1;
@@ -39,6 +41,9 @@ function init() {
 
 function startGame() {
     resetPlayerPosition();
+
+    lastHighScore = localStorage.getItem("score") || 0;
+
     score = 0;
     resetPipesPosiiton();
     randomHole();
@@ -90,8 +95,8 @@ function updatePipePosX() {
     pipePosX--;
 }
 
-function checkPlayerHitsPipeFilterOnHoles(){
-    if(holes == 1){
+function checkPlayerHitsPipeFilterOnHoles() {
+    if (holes == 1) {
         checkIfPlayerHitsPipe(false);
     } else {
         checkIfPlayerHitsPipe(pipeHole2);
@@ -120,8 +125,8 @@ function randomHole() {
     pipeHole2 = pipeHole1++;
 }
 
-function setPipeSpeed(){
-    if(holes == 2){
+function setPipeSpeed() {
+    if (holes == 2) {
         gameSpeed = 5;
     } else {
         gameSpeed = 10;
@@ -131,6 +136,14 @@ function setPipeSpeed(){
 function updateScore() {
     if (pipes[0].x == 1) {
         score++;
+        checkHighScore();
+    }
+}
+
+function checkHighScore() {
+    if (score > highScore) {
+        highScore = score;
+        localStorage.setItem("score", highScore);
     }
 }
 
@@ -143,22 +156,21 @@ function draw() {
         context.fillRect(player.x * playerSize.width, player.y * playerSize.height,
             canvas.width / gridSize.cols, canvas.height / gridSize.rows);
 
-
         // Draw pipes
         context.fillStyle = "#31EF24";
 
-        if(holes == 1){
+        if (holes == 1) {
             drawPipes(false);
-        } else if( holes == 2){
+        } else if (holes == 2) {
             drawPipes(pipeHole2);
         }
 
         // Draw score
-        drawText(score, "#31EF24", canvas.width / 2, canvas.height - 30);
+        drawText("HighScore: " + lastHighScore + ". Score: " + score, "#31EF24", canvas.width / 3, canvas.height - 30);
     }
 }
 
-function drawPipes(hole2){
+function drawPipes(hole2) {
     for (var i = 0; i < gridSize.rows; i++) {
         pipes[i].x = pipePosX;
         if (i != pipeHole1 && i !== hole2) {
@@ -170,7 +182,7 @@ function drawPipes(hole2){
 
 function drawGameMenu() {
     resetCanvas();
-    drawText("Press 'n' to start new game", "#000", canvas.width / 4, canvas.height - 30);
+    drawText("Press 'n' to start new game", "#000", canvas.width / 3, canvas.height - 30);
 }
 
 function drawText(text, color, posX, posY) {
