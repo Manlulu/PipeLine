@@ -1,12 +1,27 @@
 var canvas = document.getElementById("game_board");
 var context = canvas.getContext("2d");
 var gridSize = {cols: 15, rows: 15};
-
 var playerSize = {width: Math.ceil(canvas.width / gridSize.cols), height: Math.ceil(canvas.height / gridSize.rows)};
+
 var player = {};    // Player er x og y coordinater
 var playerDirection;
 
-var pipes = []; // Pipes kan være et array
+var score = 0;
+
+var pipes = [];
+var pipeHole1;
+var pipeHole2;
+var pipePosX = gridSize.cols + 1;
+var holes = 2;
+
+var gameSpeed = 5;
+
+var StateMachine = {
+    PLAY: 0,
+    PAUSE: 1
+};
+
+var gameState = StateMachine.PLAY;
 
 var MovingDirection = {
     LEFT: 0,
@@ -23,55 +38,150 @@ function init() {
 }
 
 function startGame() {
+    resetPlayerPosition();
+    score = 0;
+    resetPipesPosiiton();
+    randomHole();
+    setPipeSpeed();
+    if (gameState == StateMachine.PLAY) {
+        gameLoop();
+    } else {
+        drawGameMenu();
+    }
+}
+
+function resetPlayerPosition() {
     player.x = 2;
     player.y = 4;
-
-    playerDirection = MovingDirection.STAND_STILL;
-    gameLoop();
+}
+function resetPipesPosiiton() {
+    pipes = [];
+    pipePosX = gridSize.cols + 1;
+    for (var i = 0; i < gridSize.rows; i++) {
+        pipes.push({x: 5, y: i});
+    }
+    createPipeHole();
 }
 
 function gameLoop() {
     update();
     draw();
-
-    setTimeout(gameLoop, 1000 / 5);
+    tick();
 }
 
-function update() {
+function tick() {
+    if (gameState == StateMachine.PLAY) {
+        setTimeout(gameLoop, 1000 / gameSpeed);
+    }
+}
+
+function checkPlayerMovement() {
     if (allowPlayerMovement())
         movePlayer();
-
-
+}
+function update() {
+    createPipeHole();
+    checkPlayerHitsPipeFilterOnHoles();
+    updateScore();
+    updatePipePosX();
 }
 
-// Move to a more fitting location. Must refresh after each point.
-var hole1 = Math.floor(Math.random() * gridSize.rows - 2) + 1;
-var hole2 = hole1++;
+function updatePipePosX() {
+    pipePosX--;
+}
+
+function checkPlayerHitsPipeFilterOnHoles(){
+    if(holes == 1){
+        checkIfPlayerHitsPipe(false);
+    } else {
+        checkIfPlayerHitsPipe(pipeHole2);
+    }
+}
+
+function checkIfPlayerHitsPipe(hole2) {
+    if ((pipes[0].x == player.x) && (player.y != pipeHole1 && player.y != hole2)) {
+        gameState = StateMachine.PAUSE;
+        startGame();
+    }
+}
+
+function createPipeHole() {
+    if (gameState == StateMachine.PAUSE || pipePosX == 0) {
+        pipePosX = gridSize.cols;
+        randomHole();
+        setPipeSpeed();
+    }
+}
+
+function randomHole() {
+    holes = Math.floor((Math.random() * 2) + 1);
+
+    pipeHole1 = Math.floor((Math.random() * (gridSize.rows - 2)) + 1);
+    pipeHole2 = pipeHole1++;
+}
+
+function setPipeSpeed(){
+    if(holes == 2){
+        gameSpeed = 5;
+    } else {
+        gameSpeed = 10;
+    }
+}
+
+function updateScore() {
+    if (pipes[0].x == 1) {
+        score++;
+    }
+}
 
 function draw() {
-    // Reset canvas
-    context.fillStyle = "#2782D2";
-    context.fillRect(0, 0, canvas.width, canvas.height);
+    if (gameState == StateMachine.PLAY) {
+        resetCanvas();
 
-    // Draw player
-    context.fillStyle = "#C3E172";
-    context.fillRect(player.x * playerSize.width, player.y * playerSize.height,
-        canvas.width / gridSize.cols, canvas.height / gridSize.rows);
+        // Draw player
+        context.fillStyle = "#C3E172";
+        context.fillRect(player.x * playerSize.width, player.y * playerSize.height,
+            canvas.width / gridSize.cols, canvas.height / gridSize.rows);
 
 
-    for (var i = 0; i < gridSize.rows; i++) {
-        pipes.push({x: 11, y: i});
+        // Draw pipes
+        context.fillStyle = "#31EF24";
+
+        if(holes == 1){
+            drawPipes(false);
+        } else if( holes == 2){
+            drawPipes(pipeHole2);
+        }
+
+        // Draw score
+        drawText(score, "#31EF24", canvas.width / 2, canvas.height - 30);
     }
+}
 
-
-
-    context.fillStyle = "#31EF24";
+function drawPipes(hole2){
     for (var i = 0; i < gridSize.rows; i++) {
-        if (i != hole1 && i != hole2) {
+        pipes[i].x = pipePosX;
+        if (i != pipeHole1 && i !== hole2) {
             context.fillRect(pipes[i].x * playerSize.width, pipes[i].y * playerSize.height,
                 canvas.width / gridSize.cols, canvas.height / gridSize.rows);
         }
     }
+}
+
+function drawGameMenu() {
+    resetCanvas();
+    drawText("Press 'n' to start new game", "#000", canvas.width / 4, canvas.height - 30);
+}
+
+function drawText(text, color, posX, posY) {
+    context.fillStyle = color;
+    context.font = "30px Arial";
+    context.fillText(text, posX, posY);
+}
+
+function resetCanvas() {
+    context.fillStyle = "#2782D2";
+    context.fillRect(0, 0, canvas.width, canvas.height);
 }
 
 function allowPlayerMovement() {
@@ -106,29 +216,37 @@ function movePlayer() { // Want movement and stopping in the same function
 }
 
 document.addEventListener('keydown', function (event) {
-    switch (event.keyCode) {
-        case 37:
-            //       playerDirection = MovingDirection.LEFT;
-            update();
-            draw();
-            break;
-        case 38:
-            playerDirection = MovingDirection.UP;
-            update();
-            draw();
-            break;
-        case 39:
-            //       playerDirection = MovingDirection.RIGHT;
-            update();
-            draw();
-            break;
-        case 40:
-            playerDirection = MovingDirection.DOWN;
-            update();
-            draw();
-            break;
-        default:
-            playerDirection = MovingDirection.STAND_STILL;
+    if (gameState == StateMachine.PAUSE) {
+        if (event.keyCode == 78) {
+            gameState = StateMachine.PLAY;
+            startGame();
+        }
+    }
+    if (gameState == StateMachine.PLAY) {
+        switch (event.keyCode) {
+            case 37:
+                //       playerDirection = MovingDirection.LEFT;
+                checkPlayerMovement();
+                draw();
+                break;
+            case 38:
+                playerDirection = MovingDirection.UP;
+                checkPlayerMovement();
+                draw();
+                break;
+            case 39:
+                //       playerDirection = MovingDirection.RIGHT;
+                checkPlayerMovement();
+                draw();
+                break;
+            case 40:
+                playerDirection = MovingDirection.DOWN;
+                checkPlayerMovement();
+                draw();
+                break;
+            default:
+                playerDirection = MovingDirection.STAND_STILL;
+        }
     }
 });
 
