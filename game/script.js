@@ -42,7 +42,7 @@ function init() {
 function startGame() {
     resetPlayerPosition();
 
-    lastHighScore = localStorage.getItem("score") || 0;
+    lastHighScore = localStorage.getItem("pipeLine_score") || 0;
 
     score = 0;
     resetPipesPosiiton();
@@ -143,7 +143,7 @@ function updateScore() {
 function checkHighScore() {
     if (score > highScore) {
         highScore = score;
-        localStorage.setItem("score", highScore);
+        localStorage.setItem("pipeLine_score", highScore);
     }
 }
 
